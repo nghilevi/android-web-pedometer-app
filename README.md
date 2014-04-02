@@ -18,9 +18,9 @@ A sample screenshot showing how many calories you have burnt from the last 14 da
 Demo notes
 -------
 To use the web app, just go to http://www.codingisloving.com/WEBAPPS/pedometer/index.html.
-For its openness and demonstrational purposes it has not required any layer of authentication at the moment. Any one can use it and set/modify goals of current date.
+For its openness and demonstrational purposes it has not required any layer of authentication at the moment. Anyone can use it and set/modify goals of current date.
 
-To use the app, just go to this link and click on Raw: https://github.com/vinhnghi223/Pedometer-App/blob/master/Pedometer-Android-App.apk
+To get the app apkk file and install it on your device, just go to this link and click on Raw to download: https://github.com/vinhnghi223/Pedometer-App/blob/master/Pedometer-Android-App.apk
 
 Development notes
 -------
@@ -29,4 +29,7 @@ The web app is built using Angular.js, FireAngular, Bootstrap 3, jQuery, jQuery 
 
 Future development notes
 -------
-As I said there's one part of the web app has been built using D3.js but not completed yet. There's a small bug (that I think was a result of Bootstrap and Highchart's conflict) that requires users to refresh the graph once when they first open the web site to be able to see it in full width. One of my friend also test it and he said there should be some notification system for notify when you achieve/exceed your goals. In my opinion there should also be a feature to export data to csv as well. Also the data displayed on the graph can also be filtered by start and end date, not only by date range as at the moment.
+As I said there's one part of the web app has been built using D3.js but not completed yet. 
+There's a small bug (that I think was a result of Bootstrap and Highchart's conflict) that requires users to refresh the graph once when they first open the web site to be able to see it in full width. 
+One of my friend also test it and he said there should be some notification system for notify when you achieve/exceed your goals. 
+In my opinion there should also be a feature to export data to csv as well. Also the data displayed on the graph can also be filtered by start and end date, not only by date range as at the moment.
