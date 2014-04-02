@@ -1,0 +1,254 @@
+<!doctype html>
+<html ng-app="myapp">
+  <head>
+    <meta charset="UTF-8">
+    <!--libs-->
+    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.9/angular.min.js'></script>
+    <script src='https://cdn.firebase.com/v0/firebase.js'></script>
+    <script src='https://cdn.firebase.com/libs/angularfire/0.7.1/angularfire.min.js'></script>    
+    <script type="text/javascript" src="js/controllers/app.js"  ></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">    
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+  
+    <!--Graph view jquery libs-->
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+    <!--D3.js bullets view libs-->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="bullet.js"></script>
+  </head>
+  <body ng-controller="MyController">
+    <div id="wrap">
+    <div class="container" >
+      
+      <div class="row"><!--Row 1: Headline--> 
+
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"> 
+          <img src="icon.png">
+        </div> 
+
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+          <h2> Pedometer Tracking</h2>
+          <h4><i> "Counting <span style="text-decoration:line-through">your steps</span> is an art!"</i></h4>
+        </div> 
+        
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" > 
+          <br/>
+          <a id="hideShowInstruction" href="" ng-click="instructionVisible=!instructionVisible">
+            <span ng-show="instructionVisible" class="glyphicon glyphicon-remove"></span>
+            <span ng-hide="instructionVisible" class="glyphicon glyphicon-question-sign"></span>
+          </a> 
+          
+          <div ng-show="instructionVisible" id="instructionText">
+            <p>&nbsp; <b>So how to use this web app?</b> 
+            <p>&nbsp; <b>Step 1:</b> Click on <a><span class="glyphicon glyphicon-stats"></span></a> to view/refresh chart in preferred time range.</p>
+            <p>&nbsp; <b>Step 2:</b> Click on <a><span class="glyphicon glyphicon-pencil"></span></a> (or directly on the number) to modify/set your goals</p>
+            <p>&nbsp; Your data always automatically sync with your device <b>on real time</b> so that's it and have fun!:)</p>
+          </div> 
+
+        </div>
+
+      </div><!--end of Row 1-->
+
+      <hr/>        
+           
+      <div class="row"><!--Row 2: Today's stats--> 
+
+        <div class="row">
+          <p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class="glyphicon glyphicon-stats"></span><b> Today ({{today}}) Stats:</b>
+          </p> 
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="" ng-click="showBulletView()" ng-hide="bulletsViewVisibility"> <span class="glyphicon glyphicon-plus"></span> Show Bullets view</a>
+          <a href="" ng-click="hideBulletView()" ng-show="bulletsViewVisibility"> <span class="glyphicon glyphicon-minus"></span> Hide Bullets view (Sorry, this feature has not been implemented in this version yet.)</a> <br/>
+
+          <span ng-show="bulletsViewVisibility">
+            <button type="button" class="btn btn-default" style="right: 250px; position: absolute;">Update</button>
+            <div id="bullets"></div>
+          </span>
+        
+        </div>
+        <br/>
+        
+      
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
+          <a href="" ng-click="showGraph(stepsType)"><span class="glyphicon glyphicon-stats"></span>
+          Steps: </a>{{metrics.Steps}} Steps       
+        </div>
+        
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          <a href="" ng-click="showGraph(distanceType)"><span class="glyphicon glyphicon-stats"></span>
+          Distance: </a>{{metrics.Distance}} Kms
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+          <a href="" ng-click="showGraph(paceType)"><span class="glyphicon glyphicon-stats"></span>
+          Pace: </a>{{metrics.Pace}} Steps/minute
+        </div> 
+
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          <a href="" ng-click="showGraph(speedType)"><span class="glyphicon glyphicon-stats"></span>
+          Speed: </a>{{metrics.Speed}} Km/H
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+          <a href="" ng-click="showGraph(caloriesType)"><span class="glyphicon glyphicon-stats"></span>
+          Calories: </a>{{metrics.Calories}} Calories
+        </div>                         
+      </div> <!--end of Row 2: Today's stats-->
+
+           
+      <div class="row"><!--Row 3:  Goal stats view-->
+
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
+          <a href="" ng-click="onEditMode(stepsType)">
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
+          </a>
+          <span id="goalSteps" ng-click="onEditMode(stepsType)" contenteditable="true">{{metrics.GoalSteps}}</span> Steps </span>
+          <span ng-show="GoalStepsEdit">
+            <a href=""><span ng-click="submitChanges(stepsType)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(stepsType)" class="glyphicon glyphicon-remove"></span></a>
+          </span>
+        </div>
+
+         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
+          <a href="" ng-click="onEditMode(distanceType)">
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
+          </a>
+          <span id="goalDistance" ng-click="onEditMode(distanceType)" contenteditable="true">{{metrics.GoalDistance}}</span> Kms </span>
+          <span ng-show="GoalDistanceEdit">          
+            <a href=""><span ng-click="submitChanges(distanceType)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(distanceType)" class="glyphicon glyphicon-remove"></span></a>
+          </span>          
+        </div>
+
+         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">        
+          <a href="" ng-click="onEditMode(paceType)">
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
+          </a>
+          <span id="goalPace" ng-click="onEditMode(paceType)" contenteditable="true">{{metrics.GoalPace}}</span> Steps/minute </span>
+          <span ng-show="GoalPaceEdit">          
+            <a href=""><span ng-click="submitChanges(paceType)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(paceType)" class="glyphicon glyphicon-remove"></span></a>
+          </span>          
+        </div>
+
+         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
+          <a href="" ng-click="onEditMode(speedType)">
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
+          </a>
+          <span id="goalSpeed" ng-click="onEditMode(speedType)" contenteditable="true">{{metrics.GoalSpeed}}</span> Km/H </span>
+          <span ng-show="GoalSpeedEdit">          
+            <a href=""><span ng-click="submitChanges(speedType)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(speedType)" class="glyphicon glyphicon-remove"></span></a>
+          </span>          
+        </div>
+
+         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">        
+          <a href="" ng-click="onEditMode(caloriesType)">
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
+          </a>
+          <span id="goalCalories" ng-click="onEditMode(caloriesType)" contenteditable="true">{{metrics.GoalCalories}}</span> Calories </span>
+          <span ng-show="GoalCaloriesEdit">          
+            <a href=""><span ng-click="submitChanges(caloriesType)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(caloriesType)" class="glyphicon glyphicon-remove"></span></a>
+          </span>          
+        </div>
+                        
+      </div> <!--end of Row 3: Goal stats view-->
+
+      <hr/>
+
+      
+      <div class="row ng-hide" ng-show="graphVisibility"><!--Row 4: Graph view-->
+
+        <form class="form-inline" role="form">
+          <label>&nbsp;&nbsp;&nbsp;&nbsp; Day range limits: </label>
+          &nbsp;&nbsp;<input class="form-control" ng-model="numberOfViewedDays" style="width:50px">
+          &nbsp;&nbsp;<button class="btn btn-default" type="submit" ng-click="showGraph(currentType)">Refresh</button>
+        </form>        
+      
+        <br/>
+      
+        <div id="graphView" style="min-width: 310px; height: 400px; margin: 0 auto" >
+        </div>
+
+      </div><!--end of Row 4: Graph view-->
+
+    </div>
+    </div><!--end of wrap too push down footer-->
+    <div id="footer" >
+      <div class="container">
+           <p>© 2013-2014 Nghi Le Vinh. All rights reserved.</p>
+      </div>
+    </div>
+
+
+
+<script>
+  /***************** BULLETS VIEW MODULE ******************/
+
+
+  var margin = {top: 5, right: 40, bottom: 20, left: 120},
+      width = 960 - margin.left - margin.right,
+      height = 50 - margin.top - margin.bottom;
+
+  var chart = d3.bullet()
+      .width(width)
+      .height(height);
+
+  d3.json("bullets.json", function(error, data) {
+    var svg = d3.select("#bullets").selectAll("svg")
+        .data(data)
+      .enter().append("svg")
+        .attr("class", "bullet")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .call(chart);
+
+    var title = svg.append("g")
+        .style("text-anchor", "end")
+        .attr("transform", "translate(-6," + height / 2 + ")");
+
+    title.append("text")
+        .attr("class", "title")
+        .text(function(d) { return d.title; });
+
+    title.append("text")
+        .attr("class", "subtitle")
+        .attr("dy", "1em")
+        .text(function(d) { return d.subtitle; });
+
+    d3.selectAll("button").on("click", function() {
+      svg.datum(randomize).call(chart.duration(1000)); // TODO automatic transition
+    });
+  });
+
+  function randomize(d) {
+    if (!d.randomizer) d.randomizer = randomizer(d);
+    d.ranges = d.ranges.map(d.randomizer);
+    d.markers = d.markers.map(d.randomizer);
+    d.measures = d.measures.map(d.randomizer);
+    return d;
+  }
+
+  function randomizer(d) {
+    var k = d3.max(d.ranges) * .2;
+    return function(d) {
+      return Math.max(0, d + k * (Math.random() - .5));
+    };
+  }
+  
+</script>
+
+</body><!--end of container-->
+
+</html>
