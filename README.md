@@ -17,7 +17,7 @@ A sample screenshot showing how many calories you have burnt from the last 14 da
 
 Demo notes
 -------
-To use the web app, just go to http://www.codingisloving.com/WEBAPPS/pedometer/index.html.
+To use the web app, just go to http://www.codingisloving.com/WEBAPPS/pedometer/index.html
 For its openness and demonstrational purposes it has not required any layer of authentication at the moment. Anyone can use it and set/modify goals of current date.
 
 To get the app apkk file and install it on your device, just go to this link and click on Raw to download: https://github.com/vinhnghi223/Pedometer-App/blob/master/Pedometer-Android-App.apk
