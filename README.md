@@ -5,9 +5,9 @@ Introduction
 -------
 Pedometer is an instrument for estimating the distance traveled on foot by recording the number of steps taken.
 
-This project includes Pedometer android app and a web app's prototype. The web app is a single page application dashboard web app where you can find graphical chart illustration of your data. You can also set goals for each category  (such as number of steps or calories that you want to burn a day). These goals' data will also be collected and displayed on the graph to give you an insight of how good you have done. 
+This project includes Pedometer android app (which tracking your steps, calculate your speed, calories etc.) and a web app's prototype. The web app is a single page application dashboard web page where you can find graphical chart illustration of your data. You can also set goals for each category (such as number of steps or calories that you want to burn a day in that current day). These goals' data will also be collected and displayed on the graph after that to give you insights on how well you have done. 
 
-The data displayed on the web is synchronized  with those on your device on real time. That's a great feature in case of a doctor/nurse can see your progress on real time. The web UI has modern UI and UX, the user just need to use once or twice to understand how to navigate between all the options. All the information, at least at the moment, have been packed into one single home page, so the users can get all the information that they need in one page without navigate to other pages, which may take time and resources.
+The data displayed on the web is synchronized  with those on your device on real time. That's a great feature in especially in situation where a doctor/nurse want to see and keep track of your progress live. The UI is easy to understand, the user just need to use once or twice to knowo how to use all the options.  At the moment, all the information that the users need can be retrieved in one single page so that they don't need to open a new tab/navigate to a new page, which can help them save time and enhance user experience as well.
 
 ![ScreenShot](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-WebDashboard.png)
 
