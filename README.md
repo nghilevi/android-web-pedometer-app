@@ -11,7 +11,7 @@ The data displayed on the web is synchronized  with those on your device on real
 
 ![ScreenShot](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-WebDashboard.png)
 
-A sample screenshot showing how many calories you have burnt from the last 14 days. Seems like you are doing very well, time to set higher goals. Also below is our app screenshot, where data will be updated every step you go into the cloud.
+A sample screenshot showing how many calories you have burnt from the last 10 days. Also below is the app screenshot, where data will be updated and push onto the cloud every step you go .
 
 ![ScreenShot](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-AndroidApp.png)
 
