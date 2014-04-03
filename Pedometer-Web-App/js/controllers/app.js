@@ -19,12 +19,10 @@ function MyController($scope, $firebase) {
 
 	$scope.today = yyyy+'-'+mm+'-'+dd;      
 
-	//Visibility
+	/**Visibility**/
 	$scope.graphVisibility=null;
 	$scope.bulletsViewVisibility=null;
 	$scope.instructionVisible = true;
-	$scope.stepsTypeRefresh=false;
-	$scope.distanceTypeRefresh=false;
 
 	//Submit and Cancel bubttons for goalSet functionality are set invisible at first
 	$scope.GoalStepsEdit= false;
@@ -32,6 +30,127 @@ function MyController($scope, $firebase) {
 	$scope.GoalPaceEdit= false;
 	$scope.GoalSpeedEdit= false;
 	$scope.GoalCaloriesEdit= false;
+
+	//Inputting Validation System
+	function isPositiveInteger(value) {
+		return /^\+?(0|[1-9]\d*)$/.test(value);
+	}
+
+	function isPositiveDecimal(value){
+		return (/^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/.test(value));
+	}
+
+	function isPositiveNumber(value){
+		return !(!value || isNaN(value) || value<0);
+	}
+
+	/*Test cases
+	testCases={
+		0: -100,
+		1: -100.999,
+		2: null,
+		3: "",
+		4: "1a",
+		5: 100,
+		6: 100.99,
+		7: 101,
+		8: .1
+	}
+
+	console.log("isPositiveNumber");
+	for(i in testCases){
+		console.log(testCases[i]+": "+isPositiveNumber(testCases[i]));
+	}
+	console.log("isPositiveDecimal");	
+	for(i in testCases){
+		console.log(testCases[i]+": "+isPositiveDecimal(testCases[i]));
+	}
+	console.log("isPositiveInteger");	
+	for(i in testCases){
+		console.log(testCases[i]+": "+isPositiveInteger(testCases[i]));
+	}*/
+	
+
+	function filterInputForModifiedGoal(stringId,goalType,oldValue) {
+		var result=false;
+		var jqueryObj=$(stringId);
+		var value=jqueryObj.html();
+
+		function disallowInvalidInput(){
+			jqueryObj.html(oldValue);
+			value=oldValue;
+			alert("Please enter a proper input value!");			
+		}
+
+		if(typesTable[goalType].dataType=="integer"){
+			result=isPositiveInteger(value);
+		}else{
+			result=isPositiveDecimal(value);
+		}
+
+		if(!result){
+			disallowInvalidInput();			
+		}
+
+		return value;	
+	}
+
+	function filterInputForDayLimit(value){
+		 var result = isPositiveInteger(value) && (value<100);
+		 if(!result){
+		 	value=1;
+			alert("Your input will be set to 1, please enter an valid number of days, which is a positive integer less than 100");
+		 }
+		 return value;
+	}
+
+	function filterInputForDataReceivedFromServer(value){
+		if((value+"").charAt(0)=='.'){
+			value=parseFloat("0"+value);
+		}
+		var result=isPositiveNumber(value);
+		if(!result){
+			value=0;
+		}
+		return value;
+	}
+
+
+	function validateInputAndReturnValue(unreliableValue, unreliableGoalType, stringId, oldValue, alertNotification){
+		var result1 = true;
+		var result2 = true;
+		var jquerySelector;
+		var value = unreliableValue;
+		var goalType=unreliableGoalType || "steps";
+
+		if(!stringId){
+			jquerySelector = $(stringId);
+			value=jquerySelector.html();
+		}
+
+		if(!value || isNaN(value)){
+			result1=false;
+		}
+
+		if(typesTable[goalType].dataType=="integer"){
+			result2=isPositiveInteger(value);
+		}else{
+			result2=isPositiveDecimal(value);
+		}
+
+		if(!result1 || !result2){
+			value = oldValue || 0;
+			if(!stringId){
+				jquerySelector.html(oldValue);
+			}
+		}
+
+		if(alertNotification){
+			alert("Just to let you know that, your just entered an invalid number");
+		}
+
+		return value;
+	}
 
 	$scope.numberOfViewedDays = 10;
 
@@ -41,8 +160,9 @@ function MyController($scope, $firebase) {
 	$scope.speedType= "speed";
 	$scope.caloriesType= "calories";
 
-	//A types json obj containing information of each type of metrics
-	//to access, for eg datatype, use typesTable[metricType].dataType
+	/*An obj containing information of each type of metrics,act like a reference/dictionary
+	to look up for their values, for eg datatype, use typesTable[metricType].dataType*/
+
 	typesTable={
 		steps:{
 			goalTypeId: '#goalSteps',
@@ -85,6 +205,9 @@ function MyController($scope, $firebase) {
 			strTitle: 'Calories',
 			strTooltipSuffix: ' calories',
 			dataType: 'decimal'											
+		},
+		daysLimit:{
+			dataType: 'integer'
 		}		 
 	}
 
@@ -99,19 +222,13 @@ function MyController($scope, $firebase) {
 	var todayRef = new Firebase(FIREBASE_URL)
 	$scope.metrics = $firebase(todayRef);
 
-	function returnZeroIfDataNotQualified(goalValue){
+	function returnZeroIfDataNotQualified(goalValue){ ///REPLACE -----------------------------LEGACY DETECTED
 		if(!goalValue || isNaN(goalValue)==true || goalValue<0)
 			goalValue= 0;
 		if(goalValue>100)
 			goalValue= 100;
 		return goalValue;
 	}
-
-	$scope.metrics.GoalSteps=returnZeroIfDataNotQualified($scope.metrics.GoalSteps);
-	$scope.metrics.GoalDistance=returnZeroIfDataNotQualified($scope.metrics.GoalDistance);
-	$scope.metrics.GoalPace=returnZeroIfDataNotQualified($scope.metrics.GoalPace);
-	$scope.metrics.GoalSpeed=returnZeroIfDataNotQualified($scope.metrics.GoalSpeed);
-	$scope.metrics.GoalCalories=returnZeroIfDataNotQualified($scope.metrics.GoalCalories);
 
 	//Partials Bulletview
 	$scope.bulletsView="partials/index.html"; 
@@ -121,10 +238,11 @@ function MyController($scope, $firebase) {
 	$scope.hideBulletView=function(){
 		$scope.bulletsViewVisibility=false;
 	}	
+
 	/************************************************************ GRAPH MODULE ************************************************************/
 	
-	//jsonObject which will be overwritten later in showGraph() function
-    var jsonObj ={
+	//graphObject which will be overwritten later in showGraph() function
+    var graphObj ={
 	    title: {
 	        text: 'Oops, data is too shy to be ready. Please click Refresh for them to show off!',
 	        x: -20 //center
@@ -165,33 +283,22 @@ function MyController($scope, $firebase) {
 	}
 
 
-	//Override some parts of jsonObjc
+	//Override some parts of graphObjc
 	function showGraphHelper(numberOfViewedDays,datesArray,goalsArray,realMetricsArray,strTitle,strTooltipSuffix){
-		jsonObj.title.text= 'Last '+numberOfViewedDays+' days\' Statistics';
-		jsonObj.xAxis.categories=datesArray;
-		jsonObj.series[0].data=goalsArray;		    	
-		jsonObj.series[1].data=realMetricsArray;
-		jsonObj.yAxis.title.text=strTitle;
-		jsonObj.tooltip.valueSuffix=strTooltipSuffix;	
+		graphObj.title.text= 'Last '+numberOfViewedDays+' days\' Statistics';
+		graphObj.xAxis.categories=datesArray;
+		graphObj.series[0].data=goalsArray;		    	
+		graphObj.series[1].data=realMetricsArray;
+		graphObj.yAxis.title.text=strTitle;
+		graphObj.tooltip.valueSuffix=strTooltipSuffix;	
 	}
 
-//I lack of a validation system here! I will check back in the near future, this is just a quick patch
-	function isNormalInteger(str) {
-		return /^\+?(0|[1-9]\d*)$/.test(str);
-	}
 
 	function populateDataIntoArrays(metricalType){
-		
-		var numberOfViewedDays=returnZeroIfDataNotQualified($scope.numberOfViewedDays);
-		if(numberOfViewedDays==0 || numberOfViewedDays==100){
-			$scope.numberOfViewedDays=0;
-			alert("Your input will be set to 0, please enter an valid number of days.");
-		}
-		if(!isNormalInteger(numberOfViewedDays)){
-			numberOfViewedDays=0;
-			$scope.numberOfViewedDays=0;
-			alert("Your input will be set to 0, please enter an valid number of days.");
-		}
+
+		$scope.numberOfViewedDays=filterInputForDayLimit($scope.numberOfViewedDays);
+		var numberOfViewedDays=$scope.numberOfViewedDays;
+
 		//Only get the latest 100 data
 		limitedData=rootRef.endAt().limit(100); 
 
@@ -218,27 +325,27 @@ function MyController($scope, $firebase) {
 					$scope.datesArray.push(refinedDataWithKey.DateString);
 					if(metricalType=="steps"){
 						realMetricsArray.push(parseInt(refinedDataWithKey.Steps));
-						goalsArray.push(parseInt(returnZeroIfDataNotQualified(refinedDataWithKey.GoalSteps)));
+						goalsArray.push(parseInt(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalSteps)));
 						setTitleAndToolTip(metricalType);
 					}
 					if(metricalType=="distance"){
 						realMetricsArray.push(parseFloat(refinedDataWithKey.Distance));	
-						goalsArray.push(parseFloat(returnZeroIfDataNotQualified(refinedDataWithKey.GoalDistance)));
+						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalDistance)));
 						setTitleAndToolTip(metricalType);													
 					}
 					if(metricalType=="pace"){
 						realMetricsArray.push(parseInt(refinedDataWithKey.Pace));	
-						goalsArray.push(parseInt(returnZeroIfDataNotQualified(refinedDataWithKey.GoalPace)));
+						goalsArray.push(parseInt(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalPace)));
 						setTitleAndToolTip(metricalType);												
 					}
 					if(metricalType=="speed"){
 						realMetricsArray.push(parseFloat(refinedDataWithKey.Speed));	
-						goalsArray.push(parseFloat(returnZeroIfDataNotQualified(refinedDataWithKey.GoalSpeed)));
+						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalSpeed)));
 						setTitleAndToolTip(metricalType);													
 					}
 					if(metricalType=="calories"){
 						realMetricsArray.push(parseInt(refinedDataWithKey.Calories));	
-						goalsArray.push(parseInt(returnZeroIfDataNotQualified(refinedDataWithKey.GoalCalories)));	
+						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalCalories)));
 						setTitleAndToolTip(metricalType);												
 					}			
 				//}
@@ -268,7 +375,7 @@ function MyController($scope, $firebase) {
 
 	$scope.showGraph=function(metricalType){
 		populateDataIntoArrays(metricalType);//unable to see at first		
-		$('#graphView').highcharts(jsonObj);
+		$('#graphView').highcharts(graphObj);
 		$scope.graphVisibility=true;
 		$scope.currentType=metricalType;
 	}
@@ -276,7 +383,7 @@ function MyController($scope, $firebase) {
 	/************************************************************ SET/MODIFY GOAL MODULE ************************************************************/
  	//Simple validation area
 	//Check to see if updated value is NaN or <0 , if it is then get the old value of the model
-	function returnUpdatedValue(goalType,stringId,oldValue){
+	function returnUpdatedValue(goalType,stringId,oldValue){ ///REPLACE
 		var jqueryObj=$(stringId);
 		var value=jqueryObj.html();
 
@@ -288,7 +395,7 @@ function MyController($scope, $firebase) {
 		if(isNaN(value) || value<0){
 			disallowInvalidInput();
 		}
-		if(typesTable[goalType].dataType=="integer" && !isNormalInteger(value)){
+		if(typesTable[goalType].dataType=="integer" && !isPositiveInteger(value)){
 			disallowInvalidInput();
 		}
 		return value;					
@@ -340,7 +447,7 @@ function MyController($scope, $firebase) {
 		var updatedGoal, updates;
 		var stringId=typesTable[goalType].goalTypeId;
 		var oldValue=typesTable[goalType].goalValue;
-		value=returnUpdatedValue(goalType,stringId,oldValue) //receive an update value if valid or old value if not
+		value=filterInputForModifiedGoal(stringId,goalType,oldValue);
 			
 		$scope.metrics.$update(showOrHideEditLabelsAndReturnUpdatedObject(goalType,false,value));
 	}
