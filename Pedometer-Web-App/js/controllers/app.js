@@ -42,6 +42,7 @@ function MyController($scope, $firebase) {
 	$scope.caloriesType= "calories";
 
 	//A types json obj containing information of each type of metrics
+	//to access, for eg datatype, use typesTable[metricType].dataType
 	typesTable={
 		steps:{
 			goalTypeId: '#goalSteps',
@@ -49,7 +50,8 @@ function MyController($scope, $firebase) {
 			goalValue: null,
 			strTitle: 'Step(s)',
 			strTooltipSuffix: ' steps',
-			refreshBtn: 'stepsTypeRefresh'
+			refreshBtn: 'stepsTypeRefresh',
+			dataType: 'integer'
 		},
 		distance:{
 			goalTypeId: '#goalDistance',
@@ -57,28 +59,32 @@ function MyController($scope, $firebase) {
 			goalValue: null,
 			strTitle: 'Kilometer(s)', 
 			strTooltipSuffix: ' kilometers',
-			refreshBtn: 'distanceTypeRefresh'			
+			refreshBtn: 'distanceTypeRefresh',
+			dataType: 'decimal'						
 		},
 		pace:{
 			goalTypeId: '#goalPace',
 			goalTypeName: 'GoalPace',
 			goalValue: null,
 			strTitle: 'Step(s)/minute',
-			strTooltipSuffix: ' step(s)/minute'					
+			strTooltipSuffix: ' step(s)/minute',
+			dataType: 'integer'									
 		},
 		speed:{
 			goalTypeId: '#goalSpeed',
 			goalTypeName: 'GoalSpeed',			
 			goalValue: null,	
 			strTitle: 'Kilometer(s)/hour', 
-			strTooltipSuffix: ' kilometer(s)/hour'				
+			strTooltipSuffix: ' kilometer(s)/hour',
+			dataType: 'decimal'	
 		},
 		calories: {
 			goalTypeId: '#goalCalories',
 			goalTypeName: 'GoalCalories',		
 			goalValue: null,
 			strTitle: 'Calories',
-			strTooltipSuffix: ' calories'							
+			strTooltipSuffix: ' calories',
+			dataType: 'decimal'											
 		}		 
 	}
 
@@ -169,13 +175,23 @@ function MyController($scope, $firebase) {
 		jsonObj.tooltip.valueSuffix=strTooltipSuffix;	
 	}
 
+//I lack of a validation system here! I will check back in the near future, this is just a quick patch
+	function isNormalInteger(str) {
+		return /^\+?(0|[1-9]\d*)$/.test(str);
+	}
+
 	function populateDataIntoArrays(metricalType){
 		
 		var numberOfViewedDays=returnZeroIfDataNotQualified($scope.numberOfViewedDays);
 		if(numberOfViewedDays==0 || numberOfViewedDays==100){
-			alert("Please enter a number bigger than 0 and less than 100")
+			$scope.numberOfViewedDays=0;
+			alert("Your input will be set to 0, please enter an valid number of days.");
 		}
-
+		if(!isNormalInteger(numberOfViewedDays)){
+			numberOfViewedDays=0;
+			$scope.numberOfViewedDays=0;
+			alert("Your input will be set to 0, please enter an valid number of days.");
+		}
 		//Only get the latest 100 data
 		limitedData=rootRef.endAt().limit(100); 
 
@@ -258,15 +274,22 @@ function MyController($scope, $firebase) {
 	}
 
 	/************************************************************ SET/MODIFY GOAL MODULE ************************************************************/
-
-	//Check to see if updated value is NaN or not, if it is then get the old value of the model
-	function returnUpdatedValue(stringId,oldValue){
+ 	//Simple validation area
+	//Check to see if updated value is NaN or <0 , if it is then get the old value of the model
+	function returnUpdatedValue(goalType,stringId,oldValue){
 		var jqueryObj=$(stringId);
 		var value=jqueryObj.html();
-		if(isNaN(value)){
+
+		function disallowInvalidInput(){
 			jqueryObj.html(oldValue);
 			value=oldValue;
-			alert("Please enter a number!");
+			alert("Please enter a proper input value!");			
+		}		
+		if(isNaN(value) || value<0){
+			disallowInvalidInput();
+		}
+		if(typesTable[goalType].dataType=="integer" && !isNormalInteger(value)){
+			disallowInvalidInput();
 		}
 		return value;					
 	}
@@ -317,7 +340,7 @@ function MyController($scope, $firebase) {
 		var updatedGoal, updates;
 		var stringId=typesTable[goalType].goalTypeId;
 		var oldValue=typesTable[goalType].goalValue;
-		value=returnUpdatedValue(stringId,oldValue)
+		value=returnUpdatedValue(goalType,stringId,oldValue) //receive an update value if valid or old value if not
 			
 		$scope.metrics.$update(showOrHideEditLabelsAndReturnUpdatedObject(goalType,false,value));
 	}
