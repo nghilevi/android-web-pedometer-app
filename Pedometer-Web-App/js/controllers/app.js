@@ -26,7 +26,7 @@ function MyController($scope, $firebase) {
 
 	//Submit and Cancel bubttons for goalSet functionality are set invisible at first
 	$scope.GoalStepsEdit= false;
-	$scope.GoaldistanceEdit= false;
+	$scope.GoalDistanceEdit= false;
 	$scope.GoalPaceEdit= false;
 	$scope.GoalSpeedEdit= false;
 	$scope.GoalCaloriesEdit= false;
@@ -82,10 +82,16 @@ function MyController($scope, $firebase) {
 			alert("Please enter a proper input value!");			
 		}
 
-		if(typesTable[goalType].dataType=="integer"){
+		console.log(goalType);
+		console.log($scope.typesTable);
+		console.log($scope.typesTable[goalType].dataType);
+
+		if($scope.typesTable[goalType].dataType=="integer"){
 			result=isPositiveInteger(value);
+
 		}else{
 			result=isPositiveDecimal(value);
+			console.log("decimal");
 		}
 
 		if(!result){
@@ -121,7 +127,7 @@ function MyController($scope, $firebase) {
 		var result2 = true;
 		var jquerySelector;
 		var value = unreliableValue;
-		var goalType=unreliableGoalType || "steps";
+		var goalType=unreliableGoalType || "Steps";
 
 		if(!stringId){
 			jquerySelector = $(stringId);
@@ -132,7 +138,7 @@ function MyController($scope, $firebase) {
 			result1=false;
 		}
 
-		if(typesTable[goalType].dataType=="integer"){
+		if($scope.typesTable[goalType].dataType=="integer"){
 			result2=isPositiveInteger(value);
 		}else{
 			result2=isPositiveDecimal(value);
@@ -154,35 +160,34 @@ function MyController($scope, $firebase) {
 
 	$scope.numberOfViewedDays = 10;
 
-	$scope.stepsType = "steps";
-	$scope.distanceType= "distance";
-	$scope.paceType= "pace";
-	$scope.speedType= "speed";
-	$scope.caloriesType= "calories";
-
+	
 	/*An obj containing information of each type of metrics,act like a reference/dictionary
-	to look up for their values, for eg datatype, use typesTable[metricType].dataType*/
-
-	typesTable={
-		steps:{
+	to look up for their values, for eg datatype, use $scope.typesTable[metricType].dataType*/
+	$scope.typesTable={
+		types:["Steps","Distance","Pace","Speed","Calories"],
+		goalTypes :["GoalSteps","GoalDistance","GoalPace","GoalSpeed","GoalCalories"], //use as arrays so they can be loop
+		Steps:{
+			type: "Steps",
 			goalTypeId: '#goalSteps',
 			goalTypeName: 'GoalSteps',
 			goalValue: null,
 			strTitle: 'Step(s)',
-			strTooltipSuffix: ' steps',
-			refreshBtn: 'stepsTypeRefresh',
+			strTooltipSuffix: ' Steps',
+			refreshBtn: 'StepsTypeRefresh',
 			dataType: 'integer'
 		},
-		distance:{
+		Distance:{
+			type: "Distance",
 			goalTypeId: '#goalDistance',
 			goalTypeName: 'GoalDistance',
 			goalValue: null,
 			strTitle: 'Kilometer(s)', 
 			strTooltipSuffix: ' kilometers',
-			refreshBtn: 'distanceTypeRefresh',
+			refreshBtn: 'DistanceTypeRefresh',
 			dataType: 'decimal'						
 		},
-		pace:{
+		Pace:{
+			type: "Pace",
 			goalTypeId: '#goalPace',
 			goalTypeName: 'GoalPace',
 			goalValue: null,
@@ -190,7 +195,8 @@ function MyController($scope, $firebase) {
 			strTooltipSuffix: ' step(s)/minute',
 			dataType: 'integer'									
 		},
-		speed:{
+		Speed:{
+			type: "Speed",
 			goalTypeId: '#goalSpeed',
 			goalTypeName: 'GoalSpeed',			
 			goalValue: null,	
@@ -198,12 +204,13 @@ function MyController($scope, $firebase) {
 			strTooltipSuffix: ' kilometer(s)/hour',
 			dataType: 'decimal'	
 		},
-		calories: {
+		Calories: {
+			type: "Calories",
 			goalTypeId: '#goalCalories',
 			goalTypeName: 'GoalCalories',		
 			goalValue: null,
 			strTitle: 'Calories',
-			strTooltipSuffix: ' calories',
+			strTooltipSuffix: ' Calories',
 			dataType: 'decimal'											
 		},
 		daysLimit:{
@@ -220,14 +227,18 @@ function MyController($scope, $firebase) {
 	//only today metrics
 	FIREBASE_URL+=$scope.today;
 	var todayRef = new Firebase(FIREBASE_URL)
-	$scope.metrics = $firebase(todayRef);
+	$scope.metrics = $firebase(todayRef); //Initialize $scope.metrics 
 
-	function returnZeroIfDataNotQualified(goalValue){ ///REPLACE -----------------------------LEGACY DETECTED
-		if(!goalValue || isNaN(goalValue)==true || goalValue<0)
-			goalValue= 0;
-		if(goalValue>100)
-			goalValue= 100;
-		return goalValue;
+	//Inially, there is no goal types fields on the server, so value get back will be null, we want it to be 0 instead	
+	var goalTypesArray=$scope.typesTable.goalTypes;
+
+	for(i=0;i<=goalTypesArray.length-1;i++){
+		var initialValue=$scope.metrics[goalTypesArray[i]];
+
+		if(!isPositiveNumber(initialValue)){
+			$scope.metrics[goalTypesArray[i]]=0;
+			console.log($scope.metrics[goalTypesArray[i]]);
+		}	
 	}
 
 	//Partials Bulletview
@@ -312,43 +323,34 @@ function MyController($scope, $firebase) {
 
 			var strTitle,strTooltipSuffix;
 			function setTitleAndToolTip(metricalType){
-				strTitle=typesTable[metricalType].strTitle; 
-				strTooltipSuffix=typesTable[metricalType].strTooltipSuffix;
+				strTitle=$scope.typesTable[metricalType].strTitle; 
+				strTooltipSuffix=$scope.typesTable[metricalType].strTooltipSuffix;
 			}			
 
 			//push value into array
 			for (var key in refinedData) {
 				var refinedDataWithKey= refinedData[key];
-				/*if($scope.datesArray.length>=numberOfViewedDays){
-					break; //it may not break here
-				}else{	*/
-					$scope.datesArray.push(refinedDataWithKey.DateString);
-					if(metricalType=="steps"){
-						realMetricsArray.push(parseInt(refinedDataWithKey.Steps));
-						goalsArray.push(parseInt(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalSteps)));
-						setTitleAndToolTip(metricalType);
+				$scope.datesArray.push(refinedDataWithKey.DateString);
+				
+				function pushDataToArrays(metricalType){
+					var typeObj=$scope.typesTable[metricalType];
+					var inputValue=refinedDataWithKey[metricalType];
+					var inputGoalValue=filterInputForDataReceivedFromServer(refinedDataWithKey[typeObj.goalTypeName]);
+					
+					if(typeObj.dataType=="integer"){
+						inputValue=parseInt(inputValue);
+						inputGoalValue=parseInt(inputGoalValue);
+					}else{
+						inputValue=parseFloat(inputValue);
+						inputGoalValue=parseFloat(inputGoalValue);
 					}
-					if(metricalType=="distance"){
-						realMetricsArray.push(parseFloat(refinedDataWithKey.Distance));	
-						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalDistance)));
-						setTitleAndToolTip(metricalType);													
-					}
-					if(metricalType=="pace"){
-						realMetricsArray.push(parseInt(refinedDataWithKey.Pace));	
-						goalsArray.push(parseInt(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalPace)));
-						setTitleAndToolTip(metricalType);												
-					}
-					if(metricalType=="speed"){
-						realMetricsArray.push(parseFloat(refinedDataWithKey.Speed));	
-						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalSpeed)));
-						setTitleAndToolTip(metricalType);													
-					}
-					if(metricalType=="calories"){
-						realMetricsArray.push(parseInt(refinedDataWithKey.Calories));	
-						goalsArray.push(parseFloat(filterInputForDataReceivedFromServer(refinedDataWithKey.GoalCalories)));
-						setTitleAndToolTip(metricalType);												
-					}			
-				//}
+
+					realMetricsArray.push(inputValue);
+					goalsArray.push(inputGoalValue);
+				}
+				
+				setTitleAndToolTip(metricalType);
+				pushDataToArrays(metricalType);		
 			}
 			
 			finalRealMetricsArray=[];
@@ -386,7 +388,6 @@ function MyController($scope, $firebase) {
 	function returnUpdatedValue(goalType,stringId,oldValue){ ///REPLACE
 		var jqueryObj=$(stringId);
 		var value=jqueryObj.html();
-
 		function disallowInvalidInput(){
 			jqueryObj.html(oldValue);
 			value=oldValue;
@@ -395,7 +396,7 @@ function MyController($scope, $firebase) {
 		if(isNaN(value) || value<0){
 			disallowInvalidInput();
 		}
-		if(typesTable[goalType].dataType=="integer" && !isPositiveInteger(value)){
+		if($scope.typesTable[goalType].dataType=="integer" && !isPositiveInteger(value)){
 			disallowInvalidInput();
 		}
 		return value;					
@@ -403,63 +404,42 @@ function MyController($scope, $firebase) {
 	
 	//populate values from $scope.metrics to typeTable
 	function populateMetricsValuesToTypeTable(){
-		typesTable.steps.goalValue=$scope.metrics.GoalSteps;
-		typesTable.distance.goalValue=$scope.metrics.GoalDistance;	
-		typesTable.pace.goalValue=$scope.metrics.GoalPace;
-		typesTable.speed.goalValue=$scope.metrics.GoalSpeed;
-		typesTable.calories.goalValue=$scope.metrics.GoalCalories;			
+		var typeTable=$scope.typesTable;
+		var typesName=typeTable.types;
+		var metrics=$scope.metrics;
+		for(i=0;i<=typesName.length-1;i++){
+			typeTable[typesName[i]].goalValue=metrics[typeTable.goalTypes[i]];
+		}		
 	}
 
 	function showOrHideEditLabelsAndReturnUpdatedObject(goalType,booleanValue,value){
-		if(goalType=="steps"){
-			$scope.GoalStepsEdit= booleanValue;			
-		}
-
-		if(goalType=="distance"){
-			$scope.GoalDistanceEdit= booleanValue; 					
-		}		
-		if(goalType=="pace"){			 
-			$scope.GoalPaceEdit= booleanValue; 					
-		}	
-		if(goalType=="speed"){
-			$scope.GoalSpeedEdit= booleanValue; 		
-		}
-		if(goalType=="calories"){
-			$scope.GoalCaloriesEdit= booleanValue; 
-		}
-
+		var editGoalTypeName="Goal"+goalType+"Edit";
+		$scope[editGoalTypeName]= booleanValue;
 		updates={};
-		updates[typesTable[goalType].goalTypeName]=value;
+		updates[$scope.typesTable[goalType].goalTypeName]=value;
 		return updates;	
 	}
 	
 	$scope.onEditMode=function(editType){
 		showOrHideEditLabelsAndReturnUpdatedObject(editType,true, null);
-		var stringID=typesTable[editType].goalTypeId;
-		//$(stringID).contenteditable=true;		
+		var stringID=$scope.typesTable[editType].goalTypeId;	
 		$(stringID).focus();
 	}
 
 	$scope.submitChanges=function(goalType){
-
 		populateMetricsValuesToTypeTable();
-
 		var updatedGoal, updates;
-		var stringId=typesTable[goalType].goalTypeId;
-		var oldValue=typesTable[goalType].goalValue;
+		var stringId=$scope.typesTable[goalType].goalTypeId;
+		var oldValue=$scope.typesTable[goalType].goalValue;
 		value=filterInputForModifiedGoal(stringId,goalType,oldValue);
-			
 		$scope.metrics.$update(showOrHideEditLabelsAndReturnUpdatedObject(goalType,false,value));
 	}
 
 	$scope.cancel=function(goalType){
-		
 		populateMetricsValuesToTypeTable();
-
-		var stringId=typesTable[goalType].goalTypeId;
-		var oldValue=typesTable[goalType].goalValue;		
+		var stringId=$scope.typesTable[goalType].goalTypeId;
+		var oldValue=$scope.typesTable[goalType].goalValue;		
 		$(stringId).html(oldValue);
-
 		showOrHideEditLabelsAndReturnUpdatedObject(goalType,false, null);
 	}
 

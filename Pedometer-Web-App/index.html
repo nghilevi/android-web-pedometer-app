@@ -22,6 +22,17 @@
     <!--D3.js bullets view libs-->
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="bullet.js"></script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-44226715-6', 'codingisloving.com');
+      ga('send', 'pageview');
+
+    </script>    
   </head>
   <body ng-controller="MyController">
     <div id="wrap">
@@ -35,7 +46,7 @@
 
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
           <h2> Pedometer Tracking</h2>
-          <h4><i> "Counting <span style="text-decoration:line-through">your steps</span> is an art!"</i></h4>
+          <h4><i> "Counting <span style="text-decoration:line-through">your Steps</span> is an art!"</i></h4>
         </div> 
         
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" > 
@@ -78,27 +89,27 @@
         
       
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
-          <a href="" ng-click="showGraph(stepsType)"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Steps.type)"><span class="glyphicon glyphicon-stats"></span>
           Steps: </a>{{metrics.Steps}} Steps       
         </div>
         
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-          <a href="" ng-click="showGraph(distanceType)"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Distance.type)"><span class="glyphicon glyphicon-stats"></span>
           Distance: </a>{{metrics.Distance}} Kms
         </div>
 
         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-          <a href="" ng-click="showGraph(paceType)"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Pace.type)"><span class="glyphicon glyphicon-stats"></span>
           Pace: </a>{{metrics.Pace}} Steps/minute
         </div> 
 
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-          <a href="" ng-click="showGraph(speedType)"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Speed.type)"><span class="glyphicon glyphicon-stats"></span>
           Speed: </a>{{metrics.Speed}} Km/H
         </div>
 
         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-          <a href="" ng-click="showGraph(caloriesType)"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Calories.type)"><span class="glyphicon glyphicon-stats"></span>
           Calories: </a>{{metrics.Calories}} Calories
         </div>                         
       </div> <!--end of Row 2: Today's stats-->
@@ -107,57 +118,57 @@
       <div class="row"><!--Row 3:  Goal stats view-->
 
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
-          <a href="" ng-click="onEditMode(stepsType)">
+          <a href="" ng-click="onEditMode(typesTable.Steps.type)">
             <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
-          <span id="goalSteps" ng-click="onEditMode(stepsType)" contenteditable="true">{{metrics.GoalSteps}}</span> Steps </span>
+          <span id="goalSteps" ng-click="onEditMode(typesTable.Steps.type)" contenteditable="true">{{metrics.GoalSteps}}</span> Steps </span>
           <span ng-show="GoalStepsEdit">
-            <a href=""><span ng-click="submitChanges(stepsType)" class="glyphicon glyphicon-ok"></span></a>
-            <a href=""><span ng-click="cancel(stepsType)" class="glyphicon glyphicon-remove"></span></a>
+            <a href=""><span ng-click="submitChanges(typesTable.Steps.type)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(typesTable.Steps.type)" class="glyphicon glyphicon-remove"></span></a>
           </span>
         </div>
 
          <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
-          <a href="" ng-click="onEditMode(distanceType)">
+          <a href="" ng-click="onEditMode(typesTable.Distance.type)">
             <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
-          <span id="goalDistance" ng-click="onEditMode(distanceType)" contenteditable="true">{{metrics.GoalDistance}}</span> Kms </span>
+          <span id="goalDistance" ng-click="onEditMode(typesTable.Distance.type)" contenteditable="true">{{metrics.GoalDistance}}</span> Kms </span>
           <span ng-show="GoalDistanceEdit">          
-            <a href=""><span ng-click="submitChanges(distanceType)" class="glyphicon glyphicon-ok"></span></a>
-            <a href=""><span ng-click="cancel(distanceType)" class="glyphicon glyphicon-remove"></span></a>
+            <a href=""><span ng-click="submitChanges(typesTable.Distance.type)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(typesTable.Distance.type)" class="glyphicon glyphicon-remove"></span></a>
           </span>          
         </div>
 
          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">        
-          <a href="" ng-click="onEditMode(paceType)">
+          <a href="" ng-click="onEditMode(typesTable.Pace.type)">
             <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
-          <span id="goalPace" ng-click="onEditMode(paceType)" contenteditable="true">{{metrics.GoalPace}}</span> Steps/minute </span>
+          <span id="goalPace" ng-click="onEditMode(typesTable.Pace.type)" contenteditable="true">{{metrics.GoalPace}}</span> Steps/minute </span>
           <span ng-show="GoalPaceEdit">          
-            <a href=""><span ng-click="submitChanges(paceType)" class="glyphicon glyphicon-ok"></span></a>
-            <a href=""><span ng-click="cancel(paceType)" class="glyphicon glyphicon-remove"></span></a>
+            <a href=""><span ng-click="submitChanges(typesTable.Pace.type)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(typesTable.Pace.type)" class="glyphicon glyphicon-remove"></span></a>
           </span>          
         </div>
 
          <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
-          <a href="" ng-click="onEditMode(speedType)">
+          <a href="" ng-click="onEditMode(typesTable.Speed.type)">
             <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
-          <span id="goalSpeed" ng-click="onEditMode(speedType)" contenteditable="true">{{metrics.GoalSpeed}}</span> Km/H </span>
+          <span id="goalSpeed" ng-click="onEditMode(typesTable.Speed.type)" contenteditable="true">{{metrics.GoalSpeed}}</span> Km/H </span>
           <span ng-show="GoalSpeedEdit">          
-            <a href=""><span ng-click="submitChanges(speedType)" class="glyphicon glyphicon-ok"></span></a>
-            <a href=""><span ng-click="cancel(speedType)" class="glyphicon glyphicon-remove"></span></a>
+            <a href=""><span ng-click="submitChanges(typesTable.Speed.type)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(typesTable.Speed.type)" class="glyphicon glyphicon-remove"></span></a>
           </span>          
         </div>
 
          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">        
-          <a href="" ng-click="onEditMode(caloriesType)">
+          <a href="" ng-click="onEditMode(typesTable.Calories.type)">
             <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
-          <span id="goalCalories" ng-click="onEditMode(caloriesType)" contenteditable="true">{{metrics.GoalCalories}}</span> Calories </span>
+          <span id="goalCalories" ng-click="onEditMode(typesTable.Calories.type)" contenteditable="true">{{metrics.GoalCalories}}</span> Calories </span>
           <span ng-show="GoalCaloriesEdit">          
-            <a href=""><span ng-click="submitChanges(caloriesType)" class="glyphicon glyphicon-ok"></span></a>
-            <a href=""><span ng-click="cancel(caloriesType)" class="glyphicon glyphicon-remove"></span></a>
+            <a href=""><span ng-click="submitChanges(typesTable.Calories.type)" class="glyphicon glyphicon-ok"></span></a>
+            <a href=""><span ng-click="cancel(typesTable.Calories.type)" class="glyphicon glyphicon-remove"></span></a>
           </span>          
         </div>
                         
