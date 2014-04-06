@@ -3,17 +3,17 @@ Pedometer-App
 
 Introduction 
 -------
-Pedometer is the name of an instrument that estimates the distance traveled on foot by recording the number of steps taken.
+Pedometer is the name of an instrument that estimates the distance traveled on foot by recording the number of steps taken. (Please see the Demo Notes section below to learn more about how to use the app)
 
-This project includes Pedometer android app (which tracking your steps, calculate your speed, calories etc.) and a web app's prototype. The web app is a single page application dashboard web page where you can find graphical chart illustration of your data. You can also set goals for each category (such as number of steps or calories that you want to burn a day in that day etc.). These goals' data will also be collected and displayed on the graph after that to give you insights on how well you have done. 
+This project includes Pedometer android app (which tracking your steps, calculate your speed, calories etc.) and a web app's prototype. The web app is a single page application dashboard web page where you can find graphical chart illustration of your data. You can also set goals for each category (such as number of steps or calories that you want to achieve a day in that day etc.). These goals' data will also be collected and displayed on the graph after that to give you insights on how well you have done. 
 
-The data displayed on the web is synchronized  with those on your device on real time. That's a great feature in especially in situation where a doctor/nurse want to see and keep track of your progress live. The UI is easy to understand, the user just need to use once or twice to knowo how to use all the options.  At the moment, all the information that the users need can be retrieved in one single page so that they don't need to open a new tab/navigate to a new page, which can help them save time and enhance user experience as well.
+The data displayed on the web is synchronized  with those on your device on real time. That's a great feature in especially in situation where a doctor/nurse want to see and keep track of patients' health progress. The UI is easy to understand, the user just need to use once or twice to knowo how to use all the options.  At the moment, all the information that the users need can be retrieved in one single page so that they don't need to open a new tab/navigate to a new page, which can help them save time and enhance user experience as well.
 
 ![ScreenShot](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-WebDashboard.png)
 
 A sample screenshot showing how many calories you have burnt from the last 10 days. Click on the thumbnail below to view demo video.
 
-[![Alt text for your video](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-Youtube.png)](http://goo.gl/U2jrQV)
+[![Alt text for your video](https://raw.githubusercontent.com/vinhnghi223/Pedometer-App/master/Screenshot-Youtube.png)](http://goo.gl/S9762r)
 
 Also below is the app screenshot, where data will be updated and push onto the cloud every step you go .
 
@@ -21,19 +21,19 @@ Also below is the app screenshot, where data will be updated and push onto the c
 
 Demo notes
 -------
-To use the web app, just go to http://www.codingisloving.com/WEBAPPS/pedometer/index.html
-For its openness and demonstrational purposes it has not required any layer of authentication at the moment. Anyone can use it and set/modify goals of current date.
+Here is the [Demo Link](http://goo.gl/tuD8Vz) of the web app.
+Download the android apk [here](http://goo.gl/THILXx) (Click on Raw).
 
-To get the app apkk file and install it on your device, just go to this link and click on Raw to download: https://github.com/vinhnghi223/Pedometer-App/blob/master/Pedometer-Android-App.apk
+In the web app, The user only need to sign in eaither via Facebook or anonymously to be able to set/modify goals of current date. In the android app, the user also need to login as anonymous to be able to sync data. For its openness and demonstrational purposes, that's the only authentication layer. Both the web and android app do not store any personal data of the user, except what they modified.
 
 Development notes
 -------
-The android app is built using Firebase library for Android and the pedometer open-source app.
-The web app is built using Angular.js, FireAngular, Bootstrap 3, jQuery, jQuery Highchart library, and there's one part is built using D3.js but has not been fully integrated.
+The android app is built using Firebase libraries for Android and the pedometer open-source app.
+The web app is built using Angular.js, FireAngular, Bootstrap 3, jQuery, jQuery Highchart library,Firebase authentication libraru and there's one part is built using D3.js but has not been fully integrated.
 
 Future development notes
 -------
 As I said there's one part of the web app has been built using D3.js but not completed yet. 
-There's a small bug (that I think was a result of Bootstrap and Highchart's conflict) that requires users to refresh the graph once when they first open the web site to be able to see it in full width. 
-One of my friend also test it and he said there should be some notification system for notify when you achieve/exceed your goals. 
-In my opinion there should also be a feature to export data to csv as well. Also the data displayed on the graph can also be filtered by start and end date, not only by date range as at the moment.
+It would be fun if there are some kinds of notification systems for notify when you achieve/exceed your goals. 
+There should also be a feature to export data to csv as well. 
+The data displayed on the graph can also be filtered by start and end date, not only by date range.
