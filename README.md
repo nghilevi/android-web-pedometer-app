@@ -3,7 +3,7 @@ Pedometer-App
 
 Introduction 
 -------
-Pedometer is the name of an instrument that estimates the distance traveled on foot by recording the number of steps taken. (Please see the Demo Notes section below or [video demo](http://goo.gl/S9762r) to learn more about how to use the app)
+Pedometer is the name of an instrument that estimates the distance traveled on foot by recording the number of steps taken.  (Please see the Demo Notes section below or [video demo](http://goo.gl/S9762r) to learn more about how to use the app)
 
 This project includes Pedometer android app (which tracking your steps, calculate your speed, calories etc.) and a web app's prototype which is a single page application dashboard where you can find graphical chart illustration of your data. You can also set goals for each category (such as number of steps or calories that you want to achieve in a day). These goals' data will then also be collected and displayed on the graph which will give you insights on how well you have done. 
 
