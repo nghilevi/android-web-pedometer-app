@@ -29,7 +29,7 @@ In the web app, The user only need to sign in eaither via Facebook or anonymousl
 Development notes
 -------
 The android app is built using Firebase libraries for Android and the pedometer open-source app.
-The web app is built using Angular.js, FireAngular, Bootstrap 3, jQuery, jQuery Highchart library,Firebase authentication libraru and there's one part is built using D3.js but has not been fully integrated.
+The web app is built using Angular.js, FireAngular, Bootstrap 3, jQuery, jQuery Highchart library,Firebase authentication library and there's one part is built using D3.js but has not been fully integrated.
 
 Future development notes
 -------
