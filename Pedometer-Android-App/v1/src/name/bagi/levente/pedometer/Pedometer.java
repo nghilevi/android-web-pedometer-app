@@ -24,13 +24,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-import com.firebase.simplelogin.SimpleLogin;
-import com.firebase.simplelogin.SimpleLoginAuthenticatedHandler;
-import com.firebase.simplelogin.User;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -56,12 +50,7 @@ import android.widget.TextView;
 
 public class Pedometer extends Activity {
 	Firebase firebaseRef;
-	//private String firebaseURL="https://timetrackingapp.firebaseio.com/";
-	private String firebaseURL="https://pedometertracking.firebaseio.com/";
-	SimpleLogin authClient;
-	Button logInBtn;
-	Button logOutBtn;
-
+	private String firebaseURL="https://timetrackingapp.firebaseio.com/";
 	Calendar calendar;
 	SimpleDateFormat simpleDateFormat;
 	String todayDateYMD,todayDateDMY;
@@ -107,7 +96,7 @@ public class Pedometer extends Activity {
         
         simpleDateFormat = new SimpleDateFormat("dd/MM/yy");
         todayDateDMY= simpleDateFormat.format(calendar.getTime());
-        //Log.i("Date", "Today: "+todayDateDMY);
+        
         firebaseURL+=todayDateYMD;
         firebaseRef=new Firebase(firebaseURL);
         
@@ -117,51 +106,7 @@ public class Pedometer extends Activity {
         setContentView(R.layout.main);
         
         mUtils = Utils.getInstance();
-        
-        logInBtn = (Button) findViewById(R.id.loginBtn);
-        logOutBtn = (Button) findViewById(R.id.logOut);
-
-        
-        //check the user's current authentication status.
-        authClient = new SimpleLogin(firebaseRef, getApplicationContext());
-        
-        Firebase authRef = firebaseRef.getRoot().child(".info/authenticated");
-        
-        authClient.checkAuthStatus(new SimpleLoginAuthenticatedHandler() {
-        	  public void authenticated(Error error, User user) {
-        	    if (error != null) {
-        	      // Oh no! There was an error performing the check
-        	    } else if (user == null) {// No user is logged in
-        	    	logInBtn.setEnabled(true);
-        	    	logOutBtn.setEnabled(false);
-        	    } else {
-        	    	logInBtn.setText("You're logged in as anonymous");
-        	    	logInBtn.setEnabled(false);
-        	    	logOutBtn.setEnabled(true);
-        	    }
-        	  }
-
-			@Override
-			public void authenticated(
-					com.firebase.simplelogin.enums.Error arg0, User arg1) {
-				// TODO Auto-generated method stub
-				
-			}
-        	});
-        
-        authRef.addValueEventListener(new ValueEventListener() {
-	          public void onDataChange(DataSnapshot snap) {
-	            boolean isAuthenticated = snap.getValue(Boolean.class);
-	          }
-	          public void onCancelled() {}
-			@Override
-			public void onCancelled(FirebaseError arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-        });
-   	}
-
+    }
     
     @Override
     protected void onStart() {
@@ -236,40 +181,6 @@ public class Pedometer extends Activity {
                 setDesiredPaceOrSpeed(mDesiredPaceOrSpeed);
             }
         });
-        
-        
-        logInBtn.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {   
-            	logInBtn.setEnabled(false);
-    	    	logOutBtn.setEnabled(true);
-                authClient.loginAnonymously(new SimpleLoginAuthenticatedHandler() {
-              	  public void authenticated(Error error, User user) {
-              	    if(error != null) {
-              	    	authClient.logout();
-              	    }
-              	    else {
-              	    	logInBtn.setText("You're logged in as anonymous");
-              	    }
-              	  }
-    			@Override
-    			public void authenticated(
-    					com.firebase.simplelogin.enums.Error arg0, User arg1) {
-    				// TODO Auto-generated method stub
-    				
-    			}
-              	});
-            }
-        });
-        
-        logOutBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-    	    	logOutBtn.setEnabled(false);
-            	authClient.logout();
-            	logInBtn.setEnabled(true);
-            }
-        });
-        
         Button button2 = (Button) findViewById(R.id.button_desired_pace_raise);
         button2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -561,10 +472,8 @@ public class Pedometer extends Activity {
                 default:
                     super.handleMessage(msg);
             }
-            
             updates.put("DateString",todayDateDMY);       
             firebaseRef.updateChildren(updates);
-
         }
         
     };

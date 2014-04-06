@@ -129,19 +129,6 @@
                 android:text="@string/kilometers_per_hour" 
                 android:paddingBottom="@dimen/padding" 
                 android:background="@color/display_background"/>
-
-            <Button
-                android:id="@+id/loginBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="LogIn" />
-
-            <Button
-                android:id="@+id/logOut"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Logout" />
-
         </LinearLayout>
 
         <LinearLayout android:id="@+id/box_calories"

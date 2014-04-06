@@ -3,7 +3,7 @@ var app = angular.module("myapp", ["firebase"]);
 
 /*this function will be called by Angular. Once we have the scope, we can then assign variables to the scope*/
 function MyController($scope, $firebase) {
-	//get today's date
+	/* ******* GET CURRENT DATE ******* */
 	var today = new Date();
 	var dd = today.getDate();
 	var mm = today.getMonth()+1; //January is 0!
@@ -17,21 +17,74 @@ function MyController($scope, $firebase) {
 	  mm='0'+mm
 	} 
 
-	$scope.today = yyyy+'-'+mm+'-'+dd;      
+	$scope.today = yyyy+'-'+mm+'-'+dd;  
 
-	/**Visibility**/
-	$scope.graphVisibility=null;
+	/* ******* CONNECT SERVER ******* */
+	//var FIREBASE_URL="https://timetrackingapp.firebaseio.com/";
+	var FIREBASE_URL="https://pedometertracking.firebaseio.com/";
+	var rootRef = new Firebase(FIREBASE_URL); //The whole root of firebase, will be then used in showGraph()
+	FIREBASE_URL+=$scope.today; //only today metrics
+	var todayRef = new Firebase(FIREBASE_URL)
+	$scope.metrics = $firebase(todayRef); //Initialize $scope.metrics 
+
+	/* ******* OAUTH BUTTONS AND VISIBILITY ******* */
+
 	$scope.bulletsViewVisibility=null;
 	$scope.instructionVisible = true;
-
-	//Submit and Cancel bubttons for goalSet functionality are set invisible at first
-	$scope.GoalStepsEdit= false;
+	$scope.GoalStepsEdit= false; //Submit and Cancel bubttons for goalSet are set invisible at first
 	$scope.GoalDistanceEdit= false;
 	$scope.GoalPaceEdit= false;
 	$scope.GoalSpeedEdit= false;
 	$scope.GoalCaloriesEdit= false;
+	$scope.LogInState= false;
+	$(".profilePic").hide();
 
-	//Inputting Validation System
+    var auth = new FirebaseSimpleLogin(rootRef, function(error, user) {
+      if (error) { // an error occurred while attempting login
+        switch(error.code) {
+          case 'INVALID_EMAIL':
+          case 'INVALID_PASSWORD':
+          default:
+        }
+      } else if (user) { // user authenticated with Firebase
+      	$scope.LogInState= true;
+        var strSrc;
+        if(user.provider=="facebook"){
+			strSrc="http://graph.facebook.com/" + user.id + "/picture?type=square";
+			$("#username").text(user.displayName);
+        }else{
+        	strSrc="anonymous.png";
+        	$("#username").text("Anonymous");
+        }
+		$(".profilePic").attr('src', strSrc); 
+		$(".loginBtn").hide();
+		$(".profilePic").show();
+      } else {
+        auth.logout();
+        $(".loginBtn").show();
+        $(".profilePic").hide();
+      }        
+    });        
+
+    $scope.logInFB=function(){
+      auth.login('facebook', {
+        rememberMe: false,//just for testing, should be true to rmb 30 days
+        scope: 'email,user_likes'
+      }); 
+    }
+
+    $scope.logInAnonymous=function(){
+      auth.login('anonymous');
+    }        
+
+    $scope.logOut=function(){
+      auth.logout();
+      $(".loginBtn").show();
+      $(".profilePic").hide();
+      $scope.LogInState=false;
+    }
+
+	/* ******* INPUT VALIDATION ******* */
 	function isPositiveInteger(value) {
 		return /^\+?(0|[1-9]\d*)$/.test(value);
 	}
@@ -41,35 +94,8 @@ function MyController($scope, $firebase) {
 	}
 
 	function isPositiveNumber(value){
-		return !(!value || isNaN(value) || value<0);
+		return !(!value || isNaN(value) || value<0); //!value return true when value in {0,null,""} rmb 0 is just an integer, it's neither a positive nor negative integer
 	}
-
-	/*Test cases
-	testCases={
-		0: -100,
-		1: -100.999,
-		2: null,
-		3: "",
-		4: "1a",
-		5: 100,
-		6: 100.99,
-		7: 101,
-		8: .1
-	}
-
-	console.log("isPositiveNumber");
-	for(i in testCases){
-		console.log(testCases[i]+": "+isPositiveNumber(testCases[i]));
-	}
-	console.log("isPositiveDecimal");	
-	for(i in testCases){
-		console.log(testCases[i]+": "+isPositiveDecimal(testCases[i]));
-	}
-	console.log("isPositiveInteger");	
-	for(i in testCases){
-		console.log(testCases[i]+": "+isPositiveInteger(testCases[i]));
-	}*/
-	
 
 	function filterInputForModifiedGoal(stringId,goalType,oldValue) {
 		var result=false;
@@ -82,16 +108,11 @@ function MyController($scope, $firebase) {
 			alert("Please enter a proper input value!");			
 		}
 
-		console.log(goalType);
-		console.log($scope.typesTable);
-		console.log($scope.typesTable[goalType].dataType);
-
 		if($scope.typesTable[goalType].dataType=="integer"){
 			result=isPositiveInteger(value);
 
 		}else{
 			result=isPositiveDecimal(value);
-			console.log("decimal");
 		}
 
 		if(!result){
@@ -105,7 +126,7 @@ function MyController($scope, $firebase) {
 		 var result = isPositiveInteger(value) && (value<100);
 		 if(!result){
 		 	value=1;
-			alert("Your input will be set to 1, please enter an valid number of days, which is a positive integer less than 100");
+			alert("Your input will be set to 1, please enter a valid number of days, which is a positive integer and less than 100");
 		 }
 		 return value;
 	}
@@ -154,27 +175,22 @@ function MyController($scope, $firebase) {
 		if(alertNotification){
 			alert("Just to let you know that, your just entered an invalid number");
 		}
-
 		return value;
 	}
 
+	/* ******* SET INITIAL VALUES ******* */
 	$scope.numberOfViewedDays = 10;
-
-	
-	/*An obj containing information of each type of metrics,act like a reference/dictionary
-	to look up for their values, for eg datatype, use $scope.typesTable[metricType].dataType*/
-	$scope.typesTable={
-		types:["Steps","Distance","Pace","Speed","Calories"],
-		goalTypes :["GoalSteps","GoalDistance","GoalPace","GoalSpeed","GoalCalories"], //use as arrays so they can be loop
+	$scope.typesTable={ //An obj containing information of each type of metrics,act like a reference/dictionary
 		Steps:{
-			type: "Steps",
+			type: "Steps", //use as parameter for onEditMode(typesTable.Steps.type), create typeArray (below)
 			goalTypeId: '#goalSteps',
-			goalTypeName: 'GoalSteps',
+			goalTypeName: 'GoalSteps', //use for create goalTypesArray (below)
 			goalValue: null,
 			strTitle: 'Step(s)',
 			strTooltipSuffix: ' Steps',
 			refreshBtn: 'StepsTypeRefresh',
-			dataType: 'integer'
+			dataType: 'integer',
+			classNameStr: '.StepsLabel'
 		},
 		Distance:{
 			type: "Distance",
@@ -212,33 +228,17 @@ function MyController($scope, $firebase) {
 			strTitle: 'Calories',
 			strTooltipSuffix: ' Calories',
 			dataType: 'decimal'											
-		},
-		daysLimit:{
-			dataType: 'integer'
-		}		 
+		}	 
 	}
 
+	var typeArray=[];
+	var goalTypesArray=[];
 
-	var FIREBASE_URL="https://timetrackingapp.firebaseio.com/";
-	
-	//The whole root of firebase, will be then used in showGraph()
-	var rootRef = new Firebase(FIREBASE_URL);
+	var table=$scope.typesTable;
 
-	//only today metrics
-	FIREBASE_URL+=$scope.today;
-	var todayRef = new Firebase(FIREBASE_URL)
-	$scope.metrics = $firebase(todayRef); //Initialize $scope.metrics 
-
-	//Inially, there is no goal types fields on the server, so value get back will be null, we want it to be 0 instead	
-	var goalTypesArray=$scope.typesTable.goalTypes;
-
-	for(i=0;i<=goalTypesArray.length-1;i++){
-		var initialValue=$scope.metrics[goalTypesArray[i]];
-
-		if(!isPositiveNumber(initialValue)){
-			$scope.metrics[goalTypesArray[i]]=0;
-			console.log($scope.metrics[goalTypesArray[i]]);
-		}	
+	for(e in table){
+		typeArray.push(table[e].type);
+		goalTypesArray.push(table[e].goalTypeName);		
 	}
 
 	//Partials Bulletview
@@ -250,12 +250,13 @@ function MyController($scope, $firebase) {
 		$scope.bulletsViewVisibility=false;
 	}	
 
+
 	/************************************************************ GRAPH MODULE ************************************************************/
-	
-	//graphObject which will be overwritten later in showGraph() function
-    var graphObj ={
+
+    var graphObj ={ //This graphObject will be overwritten later in showGraph()
+    	initial: true,
 	    title: {
-	        text: 'Oops, data is too shy to be ready. Please click Refresh for them to show off!',
+	        text: 'Please click on one of the metrics above to view corresponding graph!',
 	        x: -20 //center
 	    },
 	    subtitle: {
@@ -293,95 +294,108 @@ function MyController($scope, $firebase) {
 	    }]
 	}
 
+	//Deserver a populateDataIntoArrays and showGraphHelper class
+	function PopulateDataHelper() {
+		this.datesArray=[];
+		this.goalsArray=[];
+		this.realMetricsArray=[];
+		$scope.numberOfViewedDays=filterInputForDayLimit($scope.numberOfViewedDays);
+		this.numberOfViewedDays=$scope.numberOfViewedDays;
 
-	//Override some parts of graphObjc
-	function showGraphHelper(numberOfViewedDays,datesArray,goalsArray,realMetricsArray,strTitle,strTooltipSuffix){
-		graphObj.title.text= 'Last '+numberOfViewedDays+' days\' Statistics';
-		graphObj.xAxis.categories=datesArray;
-		graphObj.series[0].data=goalsArray;		    	
-		graphObj.series[1].data=realMetricsArray;
-		graphObj.yAxis.title.text=strTitle;
-		graphObj.tooltip.valueSuffix=strTooltipSuffix;	
+		this.checkInReceivedData=function(array,isTypeArray){
+			var updates={};
+			var flagForUpdate=false;
+			var countReceivedNullValues=0;	
+			for(i=0;i<=array.length-1;i++){
+				var receivedValue=$scope.metrics[array[i]];
+				if(!isPositiveNumber(receivedValue)){
+					flagForUpdate=true; //even if just one of types or typeGoals is 0 then, then update that one, even update that to 0 again, the point is when its null, it should update
+					$scope.metrics[array[i]]=0;
+					//updates[array[i]]=$scope.metrics[array[i]];	
+					if(isTypeArray){
+						countReceivedNullValues++; //If all 5 types are 0/null then warning appear
+					}
+				}
+			}
+			if(flagForUpdate){
+				updates.DateString=dd+'/'+mm+'/'+yyyy; 
+				$scope.metrics.$update(updates);
+			}
+			return countReceivedNullValues;					
+		}		
+
+		this.pushDataToArrays=function(metricalType,refinedDataWithKey){
+			var typeObj=$scope.typesTable[metricalType];
+			var inputValue=refinedDataWithKey[metricalType];
+			var inputGoalValue=filterInputForDataReceivedFromServer(refinedDataWithKey[typeObj.goalTypeName]);
+			
+			if(typeObj.dataType=="integer"){
+				inputValue=parseInt(inputValue);
+				inputGoalValue=parseInt(inputGoalValue);
+			}else{
+				inputValue=parseFloat(inputValue);
+				inputGoalValue=parseFloat(inputGoalValue);
+			}
+			this.datesArray.push(refinedDataWithKey.DateString);
+			this.realMetricsArray.push(inputValue);
+			this.goalsArray.push(inputGoalValue);
+		}	
+
+		this.reverseAndLimitArray=function(originalArray){
+			var finalArray=[];
+			tempArray=originalArray.reverse();
+			for(i=0;i<$scope.numberOfViewedDays;i++){
+				finalArray.push(tempArray[i]);
+			}
+			finalArray.reverse();
+			return finalArray;	
+		}		
 	}
 
 
-	function populateDataIntoArrays(metricalType){
+	function populateDataIntoArrays(metricalType){ 
+		$('#daysLimitInput').prop('disabled', graphObj.initial); 
 
-		$scope.numberOfViewedDays=filterInputForDayLimit($scope.numberOfViewedDays);
-		var numberOfViewedDays=$scope.numberOfViewedDays;
-
-		//Only get the latest 100 data
-		limitedData=rootRef.endAt().limit(100); 
+		limitedData=rootRef.endAt().limit(100); //Only get the latest 100 data
 
 	  	limitedData.on('value', function(snapshot) {
 		  	var refinedData = snapshot.val();
-			$scope.datesArray=[];
 			
-			var goalsArray=[];
-			var realMetricsArray=[];
-			var finalDatesArray=[];
+			var helper = new PopulateDataHelper();
+			var countReceivedNullValues=helper.checkInReceivedData(typeArray,true);
+			helper.checkInReceivedData(goalTypesArray);
 
-			var strTitle,strTooltipSuffix;
-			function setTitleAndToolTip(metricalType){
-				strTitle=$scope.typesTable[metricalType].strTitle; 
-				strTooltipSuffix=$scope.typesTable[metricalType].strTooltipSuffix;
-			}			
+			if(countReceivedNullValues==5){
+				$scope.receiveNoDataNotificationVisible=true;
+			}else{
+				$scope.receiveNoDataNotificationVisible=false;
+			}						
 
-			//push value into array
-			for (var key in refinedData) {
+			for (var key in refinedData) { //Push values into array from data received from firebase/server
 				var refinedDataWithKey= refinedData[key];
-				$scope.datesArray.push(refinedDataWithKey.DateString);
-				
-				function pushDataToArrays(metricalType){
-					var typeObj=$scope.typesTable[metricalType];
-					var inputValue=refinedDataWithKey[metricalType];
-					var inputGoalValue=filterInputForDataReceivedFromServer(refinedDataWithKey[typeObj.goalTypeName]);
-					
-					if(typeObj.dataType=="integer"){
-						inputValue=parseInt(inputValue);
-						inputGoalValue=parseInt(inputGoalValue);
-					}else{
-						inputValue=parseFloat(inputValue);
-						inputGoalValue=parseFloat(inputGoalValue);
-					}
-
-					realMetricsArray.push(inputValue);
-					goalsArray.push(inputGoalValue);
-				}
-				
-				setTitleAndToolTip(metricalType);
-				pushDataToArrays(metricalType);		
-			}
-			
-			finalRealMetricsArray=[];
-			finalGoalsArray=[];	
-			$scope.datesArray.reverse();		
-			realMetricsArray.reverse();
-			goalsArray.reverse();
-
-			for(i=0;i<numberOfViewedDays;i++){
-				finalDatesArray.push($scope.datesArray[i]);
-				finalRealMetricsArray.push(realMetricsArray[i]);
-				finalGoalsArray.push(goalsArray[i]);					
+				helper.pushDataToArrays(metricalType,refinedDataWithKey);
 			}
 
-			finalDatesArray.reverse();
-			finalRealMetricsArray.reverse();
-			finalGoalsArray.reverse();
-
-			$(function () { showGraphHelper(numberOfViewedDays,finalDatesArray,finalGoalsArray,finalRealMetricsArray,strTitle,strTooltipSuffix); });	
-
+			$(function () { 
+				graphObj.title.text= metricalType+': Last '+$scope.numberOfViewedDays+' days\' Statistics';
+				graphObj.xAxis.categories=helper.reverseAndLimitArray(helper.datesArray);
+				graphObj.series[0].data=helper.reverseAndLimitArray(helper.goalsArray)		    	
+				graphObj.series[1].data=helper.reverseAndLimitArray(helper.realMetricsArray);
+				graphObj.yAxis.title.text=$scope.typesTable[metricalType].strTitle;
+				graphObj.tooltip.valueSuffix=$scope.typesTable[metricalType].strTooltipSuffix;
+				graphObj.initial=false;	
+			});	
 		});	
 	}
 
-
 	$scope.showGraph=function(metricalType){
-		populateDataIntoArrays(metricalType);//unable to see at first		
+		populateDataIntoArrays(metricalType);//unable to see at first because at first time, data still not be able to populate into this
+		//should have built sth like var graph = new graphObj(parameters); $('#graphView').highcharts(graph); //even populate stuff is now inside graphObj
 		$('#graphView').highcharts(graphObj);
-		$scope.graphVisibility=true;
 		$scope.currentType=metricalType;
 	}
 
+	
 	/************************************************************ SET/MODIFY GOAL MODULE ************************************************************/
  	//Simple validation area
 	//Check to see if updated value is NaN or <0 , if it is then get the old value of the model
@@ -405,10 +419,9 @@ function MyController($scope, $firebase) {
 	//populate values from $scope.metrics to typeTable
 	function populateMetricsValuesToTypeTable(){
 		var typeTable=$scope.typesTable;
-		var typesName=typeTable.types;
 		var metrics=$scope.metrics;
-		for(i=0;i<=typesName.length-1;i++){
-			typeTable[typesName[i]].goalValue=metrics[typeTable.goalTypes[i]];
+		for(i=0;i<=typeArray.length-1;i++){
+			typeTable[typeArray[i]].goalValue=metrics[goalTypesArray[i]];
 		}		
 	}
 
@@ -427,12 +440,18 @@ function MyController($scope, $firebase) {
 	}
 
 	$scope.submitChanges=function(goalType){
-		populateMetricsValuesToTypeTable();
-		var updatedGoal, updates;
-		var stringId=$scope.typesTable[goalType].goalTypeId;
-		var oldValue=$scope.typesTable[goalType].goalValue;
-		value=filterInputForModifiedGoal(stringId,goalType,oldValue);
-		$scope.metrics.$update(showOrHideEditLabelsAndReturnUpdatedObject(goalType,false,value));
+		console.log($scope.LogInState);
+		if($scope.LogInState){
+			populateMetricsValuesToTypeTable();
+			var updatedGoal, updates;
+			var stringId=$scope.typesTable[goalType].goalTypeId;
+			var oldValue=$scope.typesTable[goalType].goalValue;
+			value=filterInputForModifiedGoal(stringId,goalType,oldValue);
+			$scope.metrics.$update(showOrHideEditLabelsAndReturnUpdatedObject(goalType,false,value));			
+		}else{
+			$scope.cancel(goalType);
+			alert("Please sign in to be able to modify!");
+		}
 	}
 
 	$scope.cancel=function(goalType){
@@ -443,9 +462,10 @@ function MyController($scope, $firebase) {
 		showOrHideEditLabelsAndReturnUpdatedObject(goalType,false, null);
 	}
 
+	$scope.showGraph("Steps");
 	/************************************************************ EXPORT TO JSON MODULE ************************************************************/
 	//For premium user only
 
-
+		
 
 }

@@ -32,28 +32,12 @@
       ga('create', 'UA-44226715-6', 'codingisloving.com');
       ga('send', 'pageview');
 
-    </script>
-    <script type='text/javascript' src='https://cdn.firebase.com/js/simple-login/1.3.2/firebase-simple-login.js'></script>
-    <script>
-
     </script>    
   </head>
   <body ng-controller="MyController">
     <div id="wrap">
     <div class="container" >
-
-      <div class="row" id="loginBtn">
-        <div >
-          <button type="button" class="loginBtn btn btn-primary btn-sm" ng-click="logInFB()" >Log in via Facebook</button>
-          <button type="button" class="loginBtn btn btn-default btn-sm" ng-click="logInAnonymous()">Log in anonymously</button>
-        </div>
-        <div id="loginProfile">
-          <img src="" class="profilePic img-responsive" alt="Responsive image">
-          <span class="profilePic" id="username"></span><br/>
-          <button type="button" class="profilePic btn btn-link btn-sm" ng-click="logOut()">Log out</button>
-        </div>
-      </div>  
-
+      
       <div class="row"><!--Row 1: Headline--> 
 
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"> 
@@ -63,24 +47,21 @@
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
           <h2> Pedometer Tracking</h2>
           <h4><i> "Counting <span style="text-decoration:line-through">your Steps</span> is an art!"</i></h4>
-
-          <a id="hideShowInstruction" href="" ng-click="instructionVisible=!instructionVisible">
-            <span ng-hide ="instructionVisible" class="glyphicon glyphicon-remove"></span>
-            <span ng-show="instructionVisible" class="glyphicon glyphicon-question-sign"></span><b> Help</b>
-          </a> 
-          <br/>
-          <div ng-hide="instructionVisible" id="instructionText">
-            <p>&nbsp; Watch my <a href="http://goo.gl/U2jrQV"><span class="glyphicon glyphicon-play-circle"></span> less than 2 min video tutorial here.</a></p> 
-            <p>&nbsp; <b>►  </b>Your data always sync with your device <b>on real time</b>.</p>              
-            <p>&nbsp; <b>►  </b> Click on <a><span class="glyphicon glyphicon-stats"></span></a> to view/refresh chart in preferred time range.</p>
-            <p>&nbsp; <b>►  </b> Log in and click on <a><span class="glyphicon glyphicon-pencil"></span></a>/the number to modify goals</p>
-          </div> 
-
         </div> 
         
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" > 
           <br/>
-
+          <a id="hideShowInstruction" href="" ng-click="instructionVisible=!instructionVisible">
+            <span ng-show="instructionVisible" class="glyphicon glyphicon-remove"></span>
+            <span ng-hide="instructionVisible" class="glyphicon glyphicon-question-sign"></span>
+          </a> 
+          
+          <div ng-show="instructionVisible" id="instructionText">
+            <p>&nbsp; <b>So how to use this web app?</b> 
+            <p>&nbsp; <b>Step 1:</b> Click on <a><span class="glyphicon glyphicon-stats"></span></a> to view/refresh chart in preferred time range.</p>
+            <p>&nbsp; <b>Step 2:</b> Click on <a><span class="glyphicon glyphicon-pencil"></span></a> (or directly on the number) to modify/set your goals</p>
+            <p>&nbsp; Your data always automatically sync with your device <b>on real time</b> so that's it and have fun!:)</p>
+          </div> 
 
         </div>
 
@@ -91,33 +72,24 @@
       <div class="row"><!--Row 2: Today's stats--> 
 
         <div class="row">
-          <p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span class="glyphicon glyphicon-stats"></span><b> Today ({{today}}) Stats:</b>
-          </p>        
-        </div>
-          
-        <div class="row" ng-show="receiveNoDataNotificationVisible">
-          <br/>
-           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a class="alert alert-warning" ><strong>Warning!</strong> We're still not be able to receive <strong>today's data</strong> from your device. Make sure that you turn on Pedometer app and your device is connected to the internet.</a>         
-          <br/>
-          <br/>
-        </div> 
+          </p> 
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="" ng-click="showBulletView()" ng-hide="bulletsViewVisibility"> <span class="glyphicon glyphicon-plus"></span> Show Bullets view</a>
+          <a href="" ng-click="hideBulletView()" ng-show="bulletsViewVisibility"> <span class="glyphicon glyphicon-minus"></span> Hide Bullets view (Sorry, this feature has not been implemented in this version yet.)</a> <br/>
 
-        <div class="row">
-           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a href="" ng-click="showBulletView()" ng-hide="bulletsViewVisibility"> <span class="glyphicon glyphicon-plus"></span> Show bullets view</a>
-          <a href="" ng-click="hideBulletView()" ng-show="bulletsViewVisibility"> <span class="glyphicon glyphicon-minus"></span> Hide bullets view (Sorry, this feature has not been implemented in this version yet.)</a> <br/>
           <span ng-show="bulletsViewVisibility">
             <button type="button" class="btn btn-default" style="right: 250px; position: absolute;">Update</button>
             <div id="bullets"></div>
-          </span>        
+          </span>
+        
         </div>
-
         <br/>
-
+        
+      
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
-          <a href="" ng-click="showGraph(typesTable.Steps.type)" class="StepsLabel"><span class="glyphicon glyphicon-stats"></span>
+          <a href="" ng-click="showGraph(typesTable.Steps.type)"><span class="glyphicon glyphicon-stats"></span>
           Steps: </a>{{metrics.Steps}} Steps       
         </div>
         
@@ -147,7 +119,7 @@
 
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">        
           <a href="" ng-click="onEditMode(typesTable.Steps.type)">
-            <span class="glyphicon glyphicon-pencil StepsLabel"></span> Goal: 
+            <span class="glyphicon glyphicon-pencil"></span> Goal: 
           </a>
           <span id="goalSteps" ng-click="onEditMode(typesTable.Steps.type)" contenteditable="true">{{metrics.GoalSteps}}</span> Steps </span>
           <span ng-show="GoalStepsEdit">
@@ -204,14 +176,21 @@
 
       <hr/>
 
+      
+      <div class="row ng-hide" ng-show="graphVisibility"><!--Row 4: Graph view-->
 
-      <!--Graph view-->        
         <form class="form-inline" role="form">
           <label>&nbsp;&nbsp;&nbsp;&nbsp; Day range limits: </label>
-          &nbsp;&nbsp;<input id="daysLimitInput" class="form-control" ng-model="numberOfViewedDays" style="width:50px" ng-keyup="showGraph(currentType)">
+          &nbsp;&nbsp;<input class="form-control" ng-model="numberOfViewedDays" style="width:50px">
+          &nbsp;&nbsp;<button class="btn btn-default" type="submit" ng-click="showGraph(currentType)">Refresh</button>
         </form>        
+      
         <br/>
-        <div id="graphView" style="min-width: 310px; height: 400px; margin: 0 auto" ></div>
+      
+        <div id="graphView" style="min-width: 310px; height: 400px; margin: 0 auto" >
+        </div>
+
+      </div><!--end of Row 4: Graph view-->
 
     </div>
     </div><!--end of wrap too push down footer-->
