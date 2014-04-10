@@ -44,7 +44,7 @@ In the web app, The user only need to sign in either via Facebook or anonymously
    *  Firebase
    *  D3.js (has not been fully integrated)
 
-###Future development notes
+###Future development
    *  implement D3.js module
    *  systems that notify user when they achieve/exceed their goals
    *  feature to export data to csv as well
