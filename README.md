@@ -49,4 +49,5 @@ In the web app, The user only need to sign in either via Facebook or anonymously
    *  systems that notify user when they achieve/exceed their goals
    *  feature to export data to csv as well
    *  graph data can also be filtered by start and end date
+   *  auto generate & update data if the user happens to not open the web/android app that day
 
