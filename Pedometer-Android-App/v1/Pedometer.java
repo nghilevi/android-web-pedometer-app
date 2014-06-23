@@ -50,7 +50,7 @@ import android.widget.TextView;
 
 public class Pedometer extends Activity {
 	Firebase firebaseRef;
-	private String firebaseURL="https://timetrackingapp.firebaseio.com/";
+	private String firebaseURL="https://timetrackingapp.firebaseio.com/"; //Secured, you can not access the link
 	Calendar calendar;
 	SimpleDateFormat simpleDateFormat;
 	String todayDateYMD,todayDateDMY;
