@@ -1,3 +1,5 @@
+# android-web-pedometer-app (2014)
+
 Pedometer is the name of an instrument that estimates the distance traveled on foot by recording the number of steps taken. Please see the Demo Notes section below or watch my [demo 46s video](http://goo.gl/S9762r) (set the speed to 0.5 slower if you find it too fast) to get the idea of how the app works.
 
 ## Introduction
